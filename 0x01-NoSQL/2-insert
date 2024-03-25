@@ -1,9 +1,2 @@
 // MongoDB script to insert a document in the collection school
-db.school.bulkWrite([
-	{
-		insertOne:
-			{
-				document: {"name": "Holberton school"}
-			}
-	}
-]);
+db.school.insert([{ "name": "Holberton school" }]);
