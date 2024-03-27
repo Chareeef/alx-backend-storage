@@ -13,7 +13,7 @@ def count_calls(method: Callable) -> Callable:
     Return the value returned by the original method
     """
     key = method.__qualname__
-    
+
     @wraps(method)
     def wrapper(self, *args, **kwargs):
         """ Wrapper function """
@@ -27,6 +27,33 @@ def count_calls(method: Callable) -> Callable:
     return wrapper
 
 
+def call_history(method: Callable) -> Callable:
+    """ Decorator to store the history of
+    inputs and outputs for a particular function (Cache.store)
+    """
+
+    # Define inputs and outputs lists keys
+    inputs_key = method.__qualname__ + ':inputs'
+    outputs_key = method.__qualname__ + ':outputs'
+
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        """ Wrapper function """
+
+        # Store the inputs
+        self.rpush(inputs_key, str(args))
+
+        # Call the method and store the output
+        outs = method(self, *args, **kwargs)
+        self.rpush(outputs_key, outs)
+
+        # Return the original output
+        return outs
+
+    # Return the wrapper
+    return wrapper
+
+
 class Cache:
     """ Encapsulate some Redis features """
 
@@ -36,6 +63,7 @@ class Cache:
         self._redis.flushdb()
 
     @count_calls
+    @call_history
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """
         Generate a random key, store the input data in
@@ -77,5 +105,9 @@ class Cache:
         self._redis.set(key, value)
 
     def incr(self, key: str) -> None:
-        """ Increment the stored value stored in that key by 1 """
-        return self._redis.incr(key)
+        """ Increment the stored value in that key by 1 """
+        self._redis.incr(key)
+
+    def rpush(self, key: str, value: Union[str, bytes, int, float]) -> None:
+        """ Right push the value to the list stored in that key """
+        self._redis.rpush(key, value)
