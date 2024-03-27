@@ -12,6 +12,8 @@ def count_calls(method: Callable) -> Callable:
 
     Return the value returned by the original method
     """
+
+    # Define key
     key = method.__qualname__
 
     @wraps(method)
@@ -52,6 +54,54 @@ def call_history(method: Callable) -> Callable:
 
     # Return the wrapper
     return wrapper
+
+
+def replay(method: Callable) -> str:
+    """ Display the history of calls of a particular function
+
+    Output example:
+
+    >>> cache = Cache()
+    >>> cache.store("foo")
+    >>> cache.store("bar")
+    >>> cache.store(42)
+    >>> replay(cache.store)
+    Cache.store was called 3 times:
+    Cache.store(*('foo',)) -> 13bf32a9-a249-4664-95fc-b1062db2038f
+    Cache.store(*('bar',)) -> dcddd00c-4219-4dd7-8877-66afbe8e7df8
+    Cache.store(*(42,)) -> 5e752f2b-ecd8-4925-a3ce-e2efdee08d20
+    """
+
+    # Initialize the history log to be returned
+    history_log = ''
+
+    # Make a redis instance
+    r = redis.Redis()
+
+    # Construct keys
+    fn_key = method.__qualname__
+    inputs_key = method.__qualname__ + ':inputs'
+    outputs_key = method.__qualname__ + ':outputs'
+
+    # Retrieve count of calls
+    count = r.get(fn_key)
+
+    if not count:
+        count = 0
+
+    # Add it to log
+    history_log += f'{fn_key} was called {int(count)} times:\n'
+
+    # Retrieve inputs and outputs
+    inputs = r.lrange(inputs_key, 0, -1)
+    outputs = r.lrange(outputs_key, 0, -1)
+
+    # Update history_log while iterating through zipped inputs and outputs
+    for inp, outp in zip(inputs, outputs):
+        history_log += f'{fn_key}(*{eval(inp)}) -> {outp}\n'
+
+    # Return the history log
+    return history_log
 
 
 class Cache:
