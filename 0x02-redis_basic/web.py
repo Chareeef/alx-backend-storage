@@ -17,8 +17,10 @@ def get_page(url: str) -> str:
 
     # If doesn't exist, get and cache with an expiration time of 10 seconds
     if not page:
-        page = requests.get(url)
-        r.setex(url, 10, str(page))
+        page = requests.get(url).text
+        r.setex(url, 10, page)
+    else:
+        page = page.decode('utf-8')
 
     # Define the count key
     key_count = f'count:{url}'
@@ -30,4 +32,4 @@ def get_page(url: str) -> str:
     r.incr(key_count)
 
     # Return the page
-    return str(page)
+    return page
