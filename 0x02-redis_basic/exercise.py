@@ -12,21 +12,17 @@ def count_calls(method: Callable) -> Callable:
 
     Return the value returned by the original method
     """
+    key = method.__qualname__
     
     @wraps(method)
-    def wrapper(self, data: Union[str, bytes, int, float]) -> str:
+    def wrapper(self, *args, **kwargs):
         """ Wrapper function """
-        key = method.__qualname__
-
-        # Initialize counter to 0 if not done
-        if not self.get_int(key):
-            self.set(key, 0)
 
         # Increment by one the number of calls
         self.incr(key)
 
         # Call the store method and return its returned key
-        return method(self, data)
+        return method(self, *args, **kwargs)
 
     return wrapper
 
