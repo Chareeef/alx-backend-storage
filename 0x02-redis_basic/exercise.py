@@ -56,7 +56,7 @@ def call_history(method: Callable) -> Callable:
     return wrapper
 
 
-def replay(method: Callable) -> str:
+def replay(method: Callable) -> None:
     """ Display the history of calls of a particular function
 
     Output example:
@@ -100,8 +100,8 @@ def replay(method: Callable) -> str:
     for inp, outp in zip(inputs, outputs):
         history_log += f'{fn_key}(*{inp.decode()}) -> {outp.decode()}\n'
 
-    # Return the history log
-    return history_log
+    # Print the history log
+    print(history_log, end='')
 
 
 class Cache:
