@@ -87,7 +87,7 @@ def replay(method: Callable) -> str:
     count = r.get(fn_key)
 
     if not count:
-        count = 0
+        return f'{fn_key} was called 0 times\n'
 
     # Add it to log
     history_log += f'{fn_key} was called {int(count)} times:\n'
@@ -98,7 +98,6 @@ def replay(method: Callable) -> str:
 
     # Update history_log while iterating through zipped inputs and outputs
     for inp, outp in zip(inputs, outputs):
-        #history_log += f'{fn_key}(*{eval(inp)}) -> {outp.decode("utf-8")}\n'
         history_log += f'{fn_key}(*{inp.decode()}) -> {outp.decode()}\n'
 
     # Return the history log
