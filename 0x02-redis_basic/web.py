@@ -12,17 +12,22 @@ def get_page(url: str) -> str:
     # Instantiate redis
     r = redis.Redis()
 
+    # Try to get cached web_page
+    page = r.get(url)
+
+    # If doesn't exist, get and cache with an expiration time of 10 seconds
+    if not page:
+        page = requests.get(url)
+        r.setex(url, 10, str(page))
+
     # Define the count key
-    key = f'count:{url}'
+    key_count = f'count:{url}'
 
     # Get old count
-    count = r.get(key)
+    count = r.get(key_count)
 
-    # Set count with an expiration time of 10 seconds
-    if not count:
-        r.setex(key, 10, 1)
-    else:
-        r.setex(key, 10, int(count) + 1)
+    # Track number of visits to `url`
+    r.incr(key_count)
 
     # Return the page
-    return requests.get(url)
+    return str(page)
