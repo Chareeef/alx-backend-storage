@@ -4,7 +4,7 @@
 
 ## Exploring the World of Backend Storage
 
-Throughout this section, we'll cover a ton of cool topics, from the basics of relational databases and **SQL** fundamentals to advanced stuff like *MySQL* indexing, stored procedures, and *NoSQL* databases like *Redis*. Plus, we'll learn all about optimizing database performance and scalability.
+Throughout this section, we'll cover a ton of cool topics, from the basics of relational databases and **SQL** fundamentals to advanced stuff like *MySQL* indexing, stored procedures, and *NoSQL* databases like *MongoDB* and *Redis*. Plus, we'll learn all about optimizing database performance and scalability.
 
 ## Getting Started on Your Learning Path
 
