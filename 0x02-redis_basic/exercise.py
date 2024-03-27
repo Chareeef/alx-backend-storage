@@ -98,7 +98,8 @@ def replay(method: Callable) -> str:
 
     # Update history_log while iterating through zipped inputs and outputs
     for inp, outp in zip(inputs, outputs):
-        history_log += f'{fn_key}(*{eval(inp)}) -> {outp}\n'
+        #history_log += f'{fn_key}(*{eval(inp)}) -> {outp.decode("utf-8")}\n'
+        history_log += f'{fn_key}(*{inp.decode()}) -> {outp.decode()}\n'
 
     # Return the history log
     return history_log
