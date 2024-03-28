@@ -43,10 +43,12 @@ def get_page(url: str) -> str:
 
     # If doesn't exist, get and cache with an expiration time of 10 seconds
     if not page:
+        print('REQ')
         page = requests.get(url).text
-        r.setex(url, 10, page)
     else:
         page = page.decode('utf-8')
+
+    r.setex(url, 10, page)
 
     # Return the page
     return page
