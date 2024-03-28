@@ -17,7 +17,7 @@ def count_visits(fn: Callable) -> Callable:
         r = redis.Redis()
 
         # Define the count key
-        key_count = 'count:{' + url + '}'
+        key_count = 'count:' + url
 
         # Get old count
         count = int(r.get(key_count) or 0)
@@ -48,16 +48,29 @@ def get_page(url: str) -> str:
             resp = requests.get(url)
 
             if resp.status_code == 200:
-                page = str(resp.text)
+                page = resp.content
                 r.setex(url, 10, page)
             else:
                 return ''
 
         except Exception:
             return ''
-
     else:
-        page = bytes_resp.decode('utf-8')
+        page = bytes_resp
 
     # Return the page
     return page
+
+
+if __name__ == '__main__':
+    from time import sleep
+    r = redis.Redis()
+    r.flushdb()
+
+    url = 'http://slowwlyrobertomurray.co.uk'
+    url2 = 'http://google.com'
+
+    for _ in range(20):
+        print(get_page(url2)[:20])
+        print('\n   COUNT:', r.get('count:' + url2))
+        sleep(1)
