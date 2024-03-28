@@ -43,7 +43,18 @@ def get_page(url: str) -> str:
 
     # If doesn't exist, get and cache with an expiration time of 10 seconds
     if not page:
-        page = requests.get(url).text
+
+        try:
+            resp = requests.get(url)
+
+            if resp.status_code == 200:
+                page = resp.text
+            else:
+                return
+
+        except Exception:
+            return
+
     else:
         page = page.decode('utf-8')
 
@@ -58,9 +69,9 @@ if __name__ == '__main__':
     r = redis.Redis()
     r.flushdb()
 
-    url = 'http://slowwly.robertomurray.co.uk'
+    url = 'http://slowwlyrobertomurray.co.uk'
 
     for _ in range(20):
-        print(get_page(url)[:20])
+        print(get_page(url))
         print('\n   COUNT:', r.get(f'count:{url}'))
         sleep(1)
