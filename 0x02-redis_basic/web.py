@@ -20,10 +20,10 @@ def count_visits(fn: Callable) -> Callable:
         key_count = f'count:{url}'
 
         # Get old count
-        count = r.get(key_count)
+        count = int(r.get(key_count) or 0)
 
         # Track number of visits to `url`
-        r.incr(key_count)
+        r.set(key_count, count + 1, ex=10)
 
         # Return fn's result
         return fn(url)
@@ -43,7 +43,6 @@ def get_page(url: str) -> str:
 
     # If doesn't exist, get and cache with an expiration time of 10 seconds
     if not page:
-        print('REQ')
         page = requests.get(url).text
     else:
         page = page.decode('utf-8')
@@ -52,3 +51,16 @@ def get_page(url: str) -> str:
 
     # Return the page
     return page
+
+
+if __name__ == '__main__':
+    from time import sleep
+    r = redis.Redis()
+    r.flushdb()
+
+    url = 'http://slowwly.robertomurray.co.uk'
+
+    for _ in range(20):
+        print(get_page(url)[:20])
+        print('\n   COUNT:', r.get(f'count:{url}'))
+        sleep(1)
