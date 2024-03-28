@@ -17,13 +17,13 @@ def count_visits(fn: Callable) -> Callable:
         r = redis.Redis()
 
         # Define the count key
-        key_count = f'count:{url}'
+        key_count = 'count:{' + url + '}'
 
         # Get old count
         count = int(r.get(key_count) or 0)
 
         # Track number of visits to `url`
-        r.set(key_count, count + 1, ex=10)
+        r.set(key_count, count + 1)
 
         # Return fn's result
         return fn(url)
@@ -39,39 +39,25 @@ def get_page(url: str) -> str:
     r = redis.Redis()
 
     # Try to get cached web_page
-    page = r.get(url)
+    bytes_resp = r.get(url)
 
     # If doesn't exist, get and cache with an expiration time of 10 seconds
-    if not page:
+    if not bytes_resp:
 
         try:
             resp = requests.get(url)
 
             if resp.status_code == 200:
-                page = resp.text
+                page = str(resp.text)
+                r.setex(url, 10, page)
             else:
-                return
+                return ''
 
         except Exception:
-            return
+            return ''
 
     else:
-        page = page.decode('utf-8')
-
-    r.setex(url, 10, page)
+        page = bytes_resp.decode('utf-8')
 
     # Return the page
     return page
-
-
-if __name__ == '__main__':
-    from time import sleep
-    r = redis.Redis()
-    r.flushdb()
-
-    url = 'http://slowwlyrobertomurray.co.uk'
-
-    for _ in range(20):
-        print(get_page(url))
-        print('\n   COUNT:', r.get(f'count:{url}'))
-        sleep(1)

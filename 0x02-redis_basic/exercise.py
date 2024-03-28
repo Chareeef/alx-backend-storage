@@ -13,12 +13,12 @@ def count_calls(method: Callable) -> Callable:
     Return the value returned by the original method
     """
 
-    # Define key
-    key = method.__qualname__
-
     @wraps(method)
     def wrapper(self, *args, **kwargs):
         """ Wrapper function """
+
+        # Define key
+        key = method.__qualname__
 
         # Increment by one the number of calls
         self.incr(key)
@@ -87,7 +87,7 @@ def replay(method: Callable) -> None:
     count = r.get(fn_key)
 
     if not count:
-        return f'{fn_key} was called 0 times\n'
+        print(f'{fn_key} was called 0 times')
 
     # Add it to log
     history_log += f'{fn_key} was called {int(count)} times:\n'
